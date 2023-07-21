@@ -1,0 +1,154 @@
+<html>
+
+<head>
+	<title>Let's get you someplace sunny!</title>
+</head>
+
+<body>
+
+<form action="results.html" method="POST" onsubmit="return checkConditions()">
+	<div>
+		<label for="startDate">Start Date:</label>
+		<input type="date" id="startDate" name="startDate" required>
+
+		<script>
+			// Get the current date and format it as yyyy-mm-dd
+			const today = new Date();
+			const year = today.getFullYear();
+			const month = String(today.getMonth() + 1).padStart(2, '0');
+			const day = String(today.getDate()).padStart(2, '0');
+			const formattedDate = `${year}-${month}-${day}`;
+
+			// Set the minimum value for the date input
+			document.getElementById('startDate').setAttribute('min', formattedDate);
+
+			// Calculate the soonest Saturday (inclusive of today)
+      			const startDayOfWeek = today.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
+      			const daysUntilSaturday = 6 - startDayOfWeek; // Days until Saturday from today
+      			const soonestSaturday = new Date(today);
+      			soonestSaturday.setDate(today.getDate() + daysUntilSaturday);
+
+      			// Format the soonest Saturday as yyyy-mm-dd
+      			const startYear = soonestSaturday.getFullYear();
+      			const startMonth = String(soonestSaturday.getMonth() + 1).padStart(2, '0');
+      			const startDay = String(soonestSaturday.getDate()).padStart(2, '0');
+      			const formattedStartDate = `${startYear}-${startMonth}-${startDay}`;
+
+			document.getElementById('startDate').setAttribute('value', formattedStartDate);
+		</script>
+
+	</div>
+
+	<br>
+
+	<div>
+		<label for="endDate">End Date:</label>
+		<input type="date" id="endDate" name="endDate" required>
+
+		<script>
+			// Calculate the date 14 days from today and format it as yyyy-mm-dd
+			const futureDate = new Date(today);
+			futureDate.setDate(today.getDate() + 14);
+			const futureYear = futureDate.getFullYear();
+      			const futureMonth = String(futureDate.getMonth() + 1).padStart(2, '0');
+     		 	const futureDay = String(futureDate.getDate()).padStart(2, '0');
+      			const formattedFutureDate = `${futureYear}-${futureMonth}-${futureDay}`;
+
+			document.getElementById('endDate').setAttribute('max', formattedFutureDate);
+
+  			// Add event listener to the start date input field
+      			document.getElementById('startDate').addEventListener('change', function() {
+        		const startDateValue = new Date(this.value);
+        		const minEndDateValue = new Date(startDateValue);
+        		minEndDateValue.setDate(startDateValue.getDate() + 1);
+
+        		// Format the minimum end date as yyyy-mm-dd
+        		const minEndYear = minEndDateValue.getFullYear();
+        		const minEndMonth = String(minEndDateValue.getMonth() + 1).padStart(2, '0');
+        		const minEndDay = String(minEndDateValue.getDate()).padStart(2, '0');
+        		const formattedMinEndDate = `${minEndYear}-${minEndMonth}-${minEndDay}`;
+
+        		// Set the minimum value for the end date input field
+        		document.getElementById('endDate').setAttribute('min', formattedMinEndDate);
+      			});
+
+      			// Calculate the Sunday following the soonest Saturday
+      			const endSunday = new Date(soonestSaturday);
+      			endSunday.setDate(soonestSaturday.getDate() + 1);
+
+      			// Format the Sunday following the soonest Saturday as yyyy-mm-dd
+      			const endYear = endSunday.getFullYear();
+      			const endMonth = String(endSunday.getMonth() + 1).padStart(2, '0');
+      			const endDay = String(endSunday.getDate()).padStart(2, '0');
+      			const formattedEndDate = `${endYear}-${endMonth}-${endDay}`;
+
+			document.getElementById('endDate').setAttribute('value', formattedEndDate);
+		</script>
+
+	</div>
+
+	<br>
+
+	<div>
+		<label for="minTempF">Minimum Temperature (F):</label>
+		<input type="number" id="minTempF" name="minTempF" value="68" required>
+	</div>
+
+	<br>
+
+	<div>
+		<label for="maxTempF">Maximum Temperature (F):</label>
+		<input type="number" id="maxTempF" name="maxTempF" value="80" required>
+	</div>
+
+	<br>
+
+	<div>
+		<label for="conditions">Acceptable Weather Conditions:</label>
+
+		<div>
+			<label for="sunny">Mostly Sunny</label>
+			<input type="checkbox" id="sunny" name="conditions[]" value="sunny">
+		</div>
+
+		<div>
+			<label for="cloudy">Mostly Cloudy</label>
+			<input type="checkbox" id="cloudy" name="conditions[]" value="cloudy">
+		</div>
+
+		<div>
+			<label for="rainy">Mostly Rainy</label>
+			<input type="checkbox" id="rainy" name="conditions[]" value="rainy">
+		</div>
+
+		<div>
+			<label for="snowy">Mostly Snowy</label>
+			<input type="checkbox" id="snowy" name="conditions[]" value="snowy">
+		</div>
+
+	</div>
+
+	<br>
+
+	<div>
+		<input type="reset">
+		<input type="submit">
+	</div>
+
+	<script>
+		// Function to check condition checkboxes before form submission
+		function checkConditions() {
+			const checkboxes = document.querySelectorAll('input[name="conditions[]"]:checked');
+			if (checkboxes.length === 0) {
+				alert('Please select at least one acceptable weather condition.');
+				return false; // Prevent form submission
+			}
+			return true; // Allow form submission if at least one checkbox is checked
+		}
+	</script>
+
+</form>
+
+</body>
+
+</html>
