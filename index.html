@@ -1,154 +1,107 @@
+<!DOCTYPE html>
 <html>
-
 <head>
-	<title>Let's get you someplace sunny!</title>
+  <title>Weather Forecast Form</title>
 </head>
-
 <body>
+  <form id="weatherForm">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" required><br>
 
-<form action="results.html" method="POST" onsubmit="return checkConditions()">
-	<div>
-		<label for="startDate">Start Date:</label>
-		<input type="date" id="startDate" name="startDate" required>
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" required><br>
 
-		<script>
-			// Get the current date and format it as yyyy-mm-dd
-			const today = new Date();
-			const year = today.getFullYear();
-			const month = String(today.getMonth() + 1).padStart(2, '0');
-			const day = String(today.getDate()).padStart(2, '0');
-			const formattedDate = `${year}-${month}-${day}`;
+    <label for="minTemperature">Minimum Temperature (°F):</label>
+    <input type="number" id="minTemperatureF" required><br>
 
-			// Set the minimum value for the date input
-			document.getElementById('startDate').setAttribute('min', formattedDate);
+    <label for="maxTemperature">Maximum Temperature (°F):</label>
+    <input type="number" id="maxTemperatureF" required><br>
 
-			// Calculate the soonest Saturday (inclusive of today)
-      			const startDayOfWeek = today.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
-      			const daysUntilSaturday = 6 - startDayOfWeek; // Days until Saturday from today
-      			const soonestSaturday = new Date(today);
-      			soonestSaturday.setDate(today.getDate() + daysUntilSaturday);
+    <label for="weatherConditions">Acceptable Weather Conditions:</label><br>
+    <input type="checkbox" name="weatherCondition" value="sunny"> Sunny<br>
+    <input type="checkbox" name="weatherCondition" value="cloudy"> Cloudy<br>
+	<input type="checkbox" name="weatherCondition" value="rainy"> Rainy<br>
+	<input type="checkbox" name="weatherCondition" value="snowy"> Snowy<br>
 
-      			// Format the soonest Saturday as yyyy-mm-dd
-      			const startYear = soonestSaturday.getFullYear();
-      			const startMonth = String(soonestSaturday.getMonth() + 1).padStart(2, '0');
-      			const startDay = String(soonestSaturday.getDate()).padStart(2, '0');
-      			const formattedStartDate = `${startYear}-${startMonth}-${startDay}`;
+    <label for="region">Region:</label><br>
+    <input type="checkbox" id="selectAllRegion" onchange="toggleRegionCheckboxes()"> Select All<br>
+    <input type="checkbox" name="region" value="United States"> United States<br>
+    <input type="checkbox" name="region" value="Canada"> Canada<br>
+	<input type="checkbox" name="region" value="Caribbean & Central America"> Caribbean & Central America<br>
+	<input type="checkbox" name="region" value="Mexico"> Mexico<br>
+	<input type="checkbox" name="region" value="South America"> South America<br>
+	<input type="checkbox" name="region" value="United Kingdom & Europe"> United Kingdom & Europe<br>
 
-			document.getElementById('startDate').setAttribute('value', formattedStartDate);
-		</script>
+    <button type="submit">Submit</button>
+  </form>
 
-	</div>
+  <script>
+    function toggleRegionCheckboxes() {
+      const regionCheckboxes = document.querySelectorAll('input[name="region"]');
+      const selectAllRegionCheckbox = document.getElementById('selectAllRegion');
 
-	<br>
+      if (selectAllRegionCheckbox.checked) {
+        regionCheckboxes.forEach(checkbox => {
+          checkbox.checked = true;
+        });
+      } else {
+        regionCheckboxes.forEach(checkbox => {
+          checkbox.checked = false;
+        });
+      }
+    }
+  </script>
+  
+  <script>
+  const form = document.getElementById('weatherForm');
 
-	<div>
-		<label for="endDate">End Date:</label>
-		<input type="date" id="endDate" name="endDate" required>
+  form.addEventListener('submit', (event) => {
+    event.preventDefault(); // Prevent form from submitting normally
 
-		<script>
-			// Calculate the date 14 days from today and format it as yyyy-mm-dd
-			const futureDate = new Date(today);
-			futureDate.setDate(today.getDate() + 14);
-			const futureYear = futureDate.getFullYear();
-      			const futureMonth = String(futureDate.getMonth() + 1).padStart(2, '0');
-     		 	const futureDay = String(futureDate.getDate()).padStart(2, '0');
-      			const formattedFutureDate = `${futureYear}-${futureMonth}-${futureDay}`;
+    // Gather form data
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const minTemperatureF = document.getElementById('minTemperatureF').value;
+    const maxTemperatureF = document.getElementById('maxTemperatureF').value;
+    const weatherConditions = Array.from(document.querySelectorAll('input[name="weatherCondition"]:checked')).map(checkbox => checkbox.value);
+    const regions = Array.from(document.querySelectorAll('input[name="region"]:checked')).map(checkbox => checkbox.value);
 
-			document.getElementById('endDate').setAttribute('max', formattedFutureDate);
+    // Convert temperature values from Fahrenheit to Celsius
+    const minTemperatureC = (parseFloat(minTemperatureF) - 32) * (5 / 9);
+    const maxTemperatureC = (parseFloat(maxTemperatureF) - 32) * (5 / 9);
 
-  			// Add event listener to the start date input field
-      			document.getElementById('startDate').addEventListener('change', function() {
-        		const startDateValue = new Date(this.value);
-        		const minEndDateValue = new Date(startDateValue);
-        		minEndDateValue.setDate(startDateValue.getDate() + 1);
+    // Prepare the payload to send to the API
+    const payload = {
+      startDate,
+      endDate,
+      minTemperatureC,
+      maxTemperatureC,
+      weatherConditions,
+      regions,
+    };
 
-        		// Format the minimum end date as yyyy-mm-dd
-        		const minEndYear = minEndDateValue.getFullYear();
-        		const minEndMonth = String(minEndDateValue.getMonth() + 1).padStart(2, '0');
-        		const minEndDay = String(minEndDateValue.getDate()).padStart(2, '0');
-        		const formattedMinEndDate = `${minEndYear}-${minEndMonth}-${minEndDay}`;
+    // Replace 'YOUR_API_ENDPOINT_URL' with the actual URL of your API endpoint
+    const apiUrl = 'https://08s27dfhj8.execute-api.us-east-1.amazonaws.com/test';
 
-        		// Set the minimum value for the end date input field
-        		document.getElementById('endDate').setAttribute('min', formattedMinEndDate);
-      			});
-
-      			// Calculate the Sunday following the soonest Saturday
-      			const endSunday = new Date(soonestSaturday);
-      			endSunday.setDate(soonestSaturday.getDate() + 1);
-
-      			// Format the Sunday following the soonest Saturday as yyyy-mm-dd
-      			const endYear = endSunday.getFullYear();
-      			const endMonth = String(endSunday.getMonth() + 1).padStart(2, '0');
-      			const endDay = String(endSunday.getDate()).padStart(2, '0');
-      			const formattedEndDate = `${endYear}-${endMonth}-${endDay}`;
-
-			document.getElementById('endDate').setAttribute('value', formattedEndDate);
-		</script>
-
-	</div>
-
-	<br>
-
-	<div>
-		<label for="minTempF">Minimum Temperature (F):</label>
-		<input type="number" id="minTempF" name="minTempF" value="68" required>
-	</div>
-
-	<br>
-
-	<div>
-		<label for="maxTempF">Maximum Temperature (F):</label>
-		<input type="number" id="maxTempF" name="maxTempF" value="80" required>
-	</div>
-
-	<br>
-
-	<div>
-		<label for="conditions">Acceptable Weather Conditions:</label>
-
-		<div>
-			<label for="sunny">Mostly Sunny</label>
-			<input type="checkbox" id="sunny" name="conditions[]" value="sunny">
-		</div>
-
-		<div>
-			<label for="cloudy">Mostly Cloudy</label>
-			<input type="checkbox" id="cloudy" name="conditions[]" value="cloudy">
-		</div>
-
-		<div>
-			<label for="rainy">Mostly Rainy</label>
-			<input type="checkbox" id="rainy" name="conditions[]" value="rainy">
-		</div>
-
-		<div>
-			<label for="snowy">Mostly Snowy</label>
-			<input type="checkbox" id="snowy" name="conditions[]" value="snowy">
-		</div>
-
-	</div>
-
-	<br>
-
-	<div>
-		<input type="reset">
-		<input type="submit">
-	</div>
-
-	<script>
-		// Function to check condition checkboxes before form submission
-		function checkConditions() {
-			const checkboxes = document.querySelectorAll('input[name="conditions[]"]:checked');
-			if (checkboxes.length === 0) {
-				alert('Please select at least one acceptable weather condition.');
-				return false; // Prevent form submission
-			}
-			return true; // Allow form submission if at least one checkbox is checked
-		}
-	</script>
-
-</form>
+    // Send the data to the API using fetch or any AJAX library of your choice
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the API response data here (e.g., display weather forecasts)
+      console.log(data);
+    })
+    .catch(error => {
+      // Handle any errors that occur during API request
+      console.error('Error:', error);
+    });
+  });
+</script>
 
 </body>
-
 </html>
